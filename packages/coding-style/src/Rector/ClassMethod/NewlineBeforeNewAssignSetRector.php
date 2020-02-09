@@ -86,6 +86,7 @@ PHP
         }
 
         $hasChanged = false;
+
         foreach ($node->stmts as $key => $stmt) {
             $currentStmtVariableName = null;
 

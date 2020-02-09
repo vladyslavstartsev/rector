@@ -10,7 +10,7 @@ use PHPStan\Type\ObjectType;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocNode\JMS\SerializerTypeTagValueNode;
 use Rector\Core\NodeContainer\NodeCollector\ParsedNodeCollector;
-use Rector\Core\PhpParser\Node\Resolver\NameResolver;
+use Rector\Core\PhpParser\Node\Resolver\NodeNameResolver;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Rector\NodeTypeResolver\NodeTypeResolver;
 
@@ -22,9 +22,9 @@ final class ClassAnalyzer
     private $valueObjectStatusByClassName = [];
 
     /**
-     * @var NameResolver
+     * @var NodeNameResolver
      */
-    private $nameResolver;
+    private $nodeNameResolver;
 
     /**
      * @var NodeTypeResolver
@@ -37,11 +37,11 @@ final class ClassAnalyzer
     private $parsedNodeCollector;
 
     public function __construct(
-        NameResolver $nameResolver,
+        NodeNameResolver $nodeNameResolver,
         ParsedNodeCollector $parsedNodeCollector,
         NodeTypeResolver $nodeTypeResolver
     ) {
-        $this->nameResolver = $nameResolver;
+        $this->nodeNameResolver = $nodeNameResolver;
         $this->parsedNodeCollector = $parsedNodeCollector;
         $this->nodeTypeResolver = $nodeTypeResolver;
     }
@@ -52,7 +52,7 @@ final class ClassAnalyzer
             return false;
         }
 
-        $className = $this->nameResolver->getName($class);
+        $className = $this->nodeNameResolver->getName($class);
 
         if (isset($this->valueObjectStatusByClassName[$className])) {
             return $this->valueObjectStatusByClassName[$className];

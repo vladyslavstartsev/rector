@@ -22,6 +22,7 @@ use Rector\Core\RectorDefinition\RectorDefinition;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionParameter;
 
 /**
  * @see \Rector\DeadCode\Tests\Rector\ClassMethod\RemoveDelegatingParentCallRector\RemoveDelegatingParentCallRectorTest
@@ -227,13 +228,6 @@ PHP
             if ($parentClassMethod->isProtected() && $classMethod->isPublic()) {
                 return true;
             }
-
-            foreach ($parentClassMethod->params as $key => $parentParam) {
-                if (! isset($classMethod->params[$key]) && $parentParam->default !== null) {
-                    continue;
-                }
-                $this->areNodesEqual($parentParam, $classMethod->params[$key]);
-            }
         }
 
         return $this->checkOverrideUsingReflection($classMethod, $parentClassName, $methodName);
@@ -285,17 +279,28 @@ PHP
                 }
                 return true;
             }
+
             $methodParam = $classMethod->params[$key];
 
-            if ($parameter->isDefaultValueAvailable() !== isset($methodParam->default)) {
-                return true;
-            }
-            if ($parameter->isDefaultValueAvailable() && $methodParam->default !== null &&
-                ! $this->valueResolver->isValue($methodParam->default, $parameter->getDefaultValue())
-            ) {
+            if ($this->areDefaultValuesDifferent($parameter, $methodParam)) {
                 return true;
             }
         }
+        return false;
+    }
+
+    private function areDefaultValuesDifferent(ReflectionParameter $reflectionParameter, Param $methodParam): bool
+    {
+        if ($reflectionParameter->isDefaultValueAvailable() !== isset($methodParam->default)) {
+            return true;
+        }
+
+        if ($reflectionParameter->isDefaultValueAvailable() && $methodParam->default !== null &&
+            ! $this->valueResolver->isValue($methodParam->default, $reflectionParameter->getDefaultValue())
+        ) {
+            return true;
+        }
+
         return false;
     }
 }
